@@ -4,7 +4,10 @@ const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
     padding: 0;
+    background-color: #D9E6F6;
     box-sizing: border-box;
+    font-family: sans-serif;
+
   }
 `
 
