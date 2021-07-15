@@ -1,17 +1,56 @@
+import React from 'react';
 import MainGrid from '../src/components/MainGrid';
 import Box from '../src/components/Box';
-import { AlurakutMenu, OrkutNostalgicIconSet } from '../src/components/lib/AlurakurtCommons';
+import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/components/lib/AlurakurtCommons';
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
 
 function ProfileSideBar(propriedades) {
   return (
-    <Box>
+    <Box as="aside">
       <img src={`https://github.com/${propriedades.githubUser}.png`} style={{ borderRadius: '8px' }} />
+      <hr />
+      <p>
+        <a className="boxLink" href={`https://github.com/${propriedades.githubUser}`} >
+          @{propriedades.githubUser}
+        </a>
+      </p>
+      <hr />
+      <AlurakutProfileSidebarMenuDefault />
     </Box>
   )
 }
 
+function ProfileRelationsBox(propriedades) {
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">
+        {propriedades.title} ({propriedades.items.length})
+      </h2>
+      <ul>
+        {/* {seguidores.map((itemAtual) => {
+          return (
+            <li key={itemAtual}> <a href={'https://github.com/${itemAtual}.png'}><img src={itemAtual.image} />
+              <span>{itemAtual.title}</span>
+            </a>
+            </li>
+          )
+        }
+        )} */}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  )
+}
+
 export default function Home() {
+  const [comunidades, setComunidades] = React.useState([{
+    id: '123456789',
+    title: 'Eu odeio acordar cedo',
+    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
+  }]);
+
+  //const comunidades = comunidades[0];
+  //const alteradorDeComunidades/setComunidades = comunidades[1];
+  console.log(comunidades);
   const githubUser = 'MarcusNaufel';
   const pessoasFavoritas = [
     'marcobrunodev',
@@ -21,6 +60,22 @@ export default function Home() {
     'rafaballerini',
     'RonaldsS'
   ]
+  const [seguidores, Setseguidores] = React.useState([]);
+
+  React.useEffect(function () {
+    fetch('https://api.github.com/users/peas/followers')
+      .then(function (respostaDoServidor) {
+        return respostaDoServidor.json();
+      })
+      .then(function (respostaCompleta) {
+        Setseguidores(respostaCompleta);
+      })
+
+      //API GraphQL
+      fetch('')
+  }, [])
+
+  console.log('seguidores antes do return', seguidores)
 
   return (
     <>
@@ -37,8 +92,38 @@ export default function Home() {
 
             <OrkutNostalgicIconSet />
           </Box>
+          <Box>
+            <h2 className="subTitle">O que você deseja fazer?</h2>
+            <form onSubmit={function handleCriaComunidade(e) {
+              e.preventDefault();
+              const dadosForm = new FormData(e.target);
+
+              console.log('Campo: ', dadosForm.get('title'));
+              console.log('Campo: ', dadosForm.get('image'));
+
+              const comunidade = {
+                id: new Date().toISOString(),
+                title: dadosForm.get('title'),
+                image: dadosForm.get('image'),
+              }
+              const comunidadesAtualizadas = [...comunidades, comunidade]
+              setComunidades(comunidadesAtualizadas);
+
+            }} >
+              <div>
+                <input placeholder="Qual vai ser o nome da sua comunidade?" name="title" aria-label="Qual vai ser o nome da sua comunidade?" type="text" />
+              </div>
+              <div>
+                <input placeholder="coloque uma url para usarmos de capa" name="image" aria-label="coloque uma url para usarmos de capa" />
+              </div>
+              <button>
+                Criar Comunidade
+              </button>
+            </form>
+          </Box>
         </div>
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
+          <ProfileRelationsBox title="Seguidores" items={seguidores} />
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
               Pessoas da Comunidade ({pessoasFavoritas.length})
@@ -48,7 +133,7 @@ export default function Home() {
             <ul>
               {pessoasFavoritas.map((itemAtual) => {
                 return (
-                  <li> <a href="{'/users/${itemAtual}'} key={itemAtual}"><img src={`https://github.com/${itemAtual}.png`} />
+                  <li key={itemAtual}> <a href="https://github.com/marcobrunodev" target="_blank"><img src={`https://github.com/${itemAtual}.png`} />
                     <span>{itemAtual}</span>
                   </a>
                   </li>
@@ -57,9 +142,23 @@ export default function Home() {
               )}
             </ul>
           </ProfileRelationsBoxWrapper>
-          <Box>
-            Comunidades
-          </Box>
+          <ProfileRelationsBoxWrapper>
+            <h2 className="smallTitle">
+              Comunidades ({comunidades.length})
+            </h2>
+            <ul>
+              {comunidades.map((itemAtual) => {
+                return (
+                  <li key={itemAtual.id}> <a href="{'/users/${itemAtual.title}'}"><img src={itemAtual.image} />
+                    <span>{itemAtual.title}</span>
+                  </a>
+                  </li>
+                )
+              }
+              )}
+            </ul>
+          </ProfileRelationsBoxWrapper>
+
         </div>
       </MainGrid>
     </>

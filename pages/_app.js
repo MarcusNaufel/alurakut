@@ -12,7 +12,8 @@ const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
     padding: 0;
-    background-color: #D9E6F6;
+    background-image: url('https://media.giphy.com/media/ohONS2y8GTDoI/giphy.gif');
+    //background-color: #D9E6F6;
     box-sizing: border-box;
     font-family: sans-serif;
 
@@ -31,6 +32,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   ${AlurakutStyles}
+  
 `;
 
 const theme = {
