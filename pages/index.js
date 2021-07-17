@@ -42,11 +42,8 @@ function ProfileRelationsBox(propriedades) {
 }
 
 export default function Home() {
-  const [comunidades, setComunidades] = React.useState([{
-    id: '123456789',
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }]);
+  const usuarioAleatorio = 'MarcusNaufel'
+  const [comunidades, setComunidades] = React.useState([{}]);
 
   //const comunidades = comunidades[0];
   //const alteradorDeComunidades/setComunidades = comunidades[1];
@@ -71,8 +68,31 @@ export default function Home() {
         Setseguidores(respostaCompleta);
       })
 
-      //API GraphQL
-      fetch('')
+    //API GraphQL
+    fetch('https://graphql.datocms.com/', {
+      method: 'POST',
+      headers: {
+        'Authorization': '2e4c3b3ff1e9f207453c53e7578146',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        "query": `query {
+          allCommunities {
+            title
+            id
+            imageUrl
+            creatorSlug
+          }
+        }
+        `})
+    })
+      .then((response) => response.json())
+      .then((respostaCompleta) => {
+        const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
+        console.log(comunidadesVindasDoDato)
+        setComunidades(comunidadesVindasDoDato)
+      })
   }, [])
 
   console.log('seguidores antes do return', seguidores)
@@ -96,28 +116,50 @@ export default function Home() {
             <h2 className="subTitle">O que você deseja fazer?</h2>
             <form onSubmit={function handleCriaComunidade(e) {
               e.preventDefault();
-              const dadosForm = new FormData(e.target);
+              const dadosDoForm = new FormData(e.target);
 
-              console.log('Campo: ', dadosForm.get('title'));
-              console.log('Campo: ', dadosForm.get('image'));
+              console.log('Campo: ', dadosDoForm.get('title'));
+              console.log('Campo: ', dadosDoForm.get('image'));
 
               const comunidade = {
-                id: new Date().toISOString(),
-                title: dadosForm.get('title'),
-                image: dadosForm.get('image'),
+                title: dadosDoForm.get('title'),
+                imageUrl: dadosDoForm.get('image'),
+                creatorSlug: usuarioAleatorio,
               }
-              const comunidadesAtualizadas = [...comunidades, comunidade]
-              setComunidades(comunidadesAtualizadas);
 
-            }} >
+              fetch('/api/comunidades', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(comunidade)
+              })
+                .then(async (response) => {
+                  const dados = await response.json();
+                  console.log(dados.registroCriado);
+                  const comunidade = dados.registroCriado;
+                  const comunidadesAtualizadas = [...comunidades, comunidade];
+                  setComunidades(comunidadesAtualizadas)
+                })
+            }}>
               <div>
-                <input placeholder="Qual vai ser o nome da sua comunidade?" name="title" aria-label="Qual vai ser o nome da sua comunidade?" type="text" />
+                <input
+                  placeholder="Qual vai ser o nome da sua comunidade?"
+                  name="title"
+                  aria-label="Qual vai ser o nome da sua comunidade?"
+                  type="text"
+                />
               </div>
               <div>
-                <input placeholder="coloque uma url para usarmos de capa" name="image" aria-label="coloque uma url para usarmos de capa" />
+                <input
+                  placeholder="Coloque uma URL para usarmos de capa"
+                  name="image"
+                  aria-label="Coloque uma URL para usarmos de capa"
+                />
               </div>
+
               <button>
-                Criar Comunidade
+                Criar comunidade
               </button>
             </form>
           </Box>
@@ -149,7 +191,7 @@ export default function Home() {
             <ul>
               {comunidades.map((itemAtual) => {
                 return (
-                  <li key={itemAtual.id}> <a href="{'/users/${itemAtual.title}'}"><img src={itemAtual.image} />
+                  <li key={itemAtual.id}> <a href="{'/communities/${itemAtual.id}'}"><img src={itemAtual.imageUrl} />
                     <span>{itemAtual.title}</span>
                   </a>
                   </li>
